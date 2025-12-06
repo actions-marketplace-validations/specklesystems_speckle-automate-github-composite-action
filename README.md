@@ -32,15 +32,10 @@ Please note that this is not a Speckle Account token, but a **Speckle Automate A
 
 Your Speckle Token must have write permissions for the Speckle Function with this ID, otherwise the publish will fail.
 
-#### `speckle_function_path`
-
-The path to the Speckle Automate Function to publish. This path is relative to the root of the repository. If you provide a path to a directory, your Speckle Automate Function must be in a file named `specklefunction.yaml` within that directory.
-
-Defaults to the root of the repository.
-
-#### `speckle_function_input_schema`
+#### `speckle_function_input_schema_file_path`
 
 The path to a file containing a JSON Schema. This JSON Schema defines the parameters required by the Function. The JSON Schema will be used to automatically create the User Interface displayed to users of your Function in Speckle Automate. Users will be able to provide their data to customise the Function.
+This can be an absolute path, or a path relative to the Home directory of the GitHub Action runner.
 
 Defaults to `./input-schema.json`
 
@@ -49,6 +44,14 @@ Defaults to `./input-schema.json`
 *Required.* The command to run to execute the function in a runtime environment.
 
 For example, if you are using Python, you might use `python3 main.py`. If you are using Node.js, you might use `node main.js`. If using bash shell, `bash main.sh` etc. etc..  Even if the command is defined within your Dockerfile (for examples, using the `CMD` or `ENTRYPOINT` statements), you must provide the command here in order for Speckle Automate to run the function.
+
+#### `speckle_function_recommended_cpu_m`
+
+The recommended maximum CPU in millicores for the function. 1000 millicores = 1 CPU core. Defaults to 1000 millicores (1 CPU core). If the Function exceeds this limit, it will be throttled to run within the limit.
+
+#### `speckle_function_recommended_memory_mi`
+
+The recommended maximum memory in mebibytes for the function. 1024 mebibytes = 1 gibibyte. Defaults to 100 mebibytes. If the Function exceeds this limit, it will be terminated.
 
 #### `dockerfile_path`
 
@@ -89,8 +92,9 @@ This GitHub Action does not have any outputs. Please instead inspect the logs to
       docker:
         runs-on: ubuntu-latest
         steps:
-          -
-            name: Register, Build, and Publish a Speckle Function
+          - name: Checkout
+            uses: actions/checkout@v5 # <-- CONFIGURE CHECKOUT FOR YOUR CODE
+          - name: Register, Build, and Publish a Speckle Function
             uses: specklesystems/speckle-automate-github-composite-action
             with:
               speckle_token: ${{ secrets.SPECKLE_FUNCTION_PUBLISH_TOKEN }}
